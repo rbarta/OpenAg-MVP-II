@@ -80,13 +80,20 @@ class si7021(object):
     def test(self):
         'Self test of the object'
         print('\n*** Test SI7021 ***\n')
-        print('Temp C: %.2f F' %self.getTempC())
-        print('Humidity : %.2f %%' %self.getHumidity())
+        temp = self.getTempC()
+        rhumid = self.getHumidity()
         temp=self.getTempC()
         if temp == None:
-            print(self.getError())
+            print("Error getting temperature: %s" %self.getError())
         else:
-            print "No error caught"
+            print('Temp C: %.2f F' %temp)
+            print("No error caught")
+
+        if rhumid == None:
+            print("Error getting humidity: %s" %self.getError())
+        else:
+            print('Humidity : %.2f %%' %rhumid)
+            print("No error caught")
 
 if __name__=="__main__":
     t=si7021()
