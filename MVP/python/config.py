@@ -46,8 +46,8 @@ settings = {
             'Purpose': ['Circulation', 'Exhaust'],
             'Relay': [33, 32],
             'Type': 'Fan',
-            'SpeedPin': 0,
-            'RpmPin': 0
+            'SpeedPin': [0, 0],
+            'RpmPin': [0, 0]
         },
         'Light' : {
             'Mode': 'Check',
