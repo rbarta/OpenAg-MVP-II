@@ -46,13 +46,13 @@ echo  "###### Install CouchDB ######"
 $TARGET/setup/releaseScript_DB.sh || error_exit "Failure installing CouchDB"
 
 echo  "###### Install Libraries and Local changes ######"
-$TARGET/setup/releaseScript_Local.sh || error_exit "Failure installing CouchDB"
+$TARGET/setup/releaseScript_Local.sh || error_exit "Failure installing Libraries and Local changes"
 
 echo  "###### Test ######"
-$TARGET/setup/releaseScript_Test.sh || error_exit "Failure installing CouchDB"
+$TARGET/setup/releaseScript_Test.sh || error_exit "Failure running Tests"
 
 echo  "###### Final Configuration ######"
-$TARGET/setup/releaseScript_Final.sh || error_exit "Failure installing CouchDB"
+$TARGET/setup/releaseScript_Final.sh || error_exit "Failure get and install files from GitHub repository"
 
 echo "##### Release Install Completed Successfully, You should reboot the system #####"
 
