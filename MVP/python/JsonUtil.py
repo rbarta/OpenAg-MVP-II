@@ -14,7 +14,7 @@ def makeEnvJson(activity_type, subject, subject_location, attribute, value, part
     if validate:
         valid, reason=validateEnvironObsv(subject, subject_location, attribute, value, participant, status, status_qualifier)
         if not valid:
-            print "Failure Validation", reason
+            print("Failure Validation", reason)
 
     if timestamp==None:
         timestamp = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.utcnow())
@@ -39,7 +39,7 @@ def makePhenoJson(activity_type, plot_id, subject, attribute, value, participant
     if validate:
         valid,reason=validatePhenoObsv(plot_id, subject, attribute, value, participant, status, status_qualifier)
         if not valid:
-            print "Failure Validation", reason
+            print("Failure Validation", reason)
 
     if timestamp==None:
         timestamp = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.utcnow())
@@ -118,15 +118,15 @@ def getPhenoUnits(attribute):
 def prettyPrint(txt):
     '''Dump json in nice format'''
     #print type(txt)
-    print json.dumps(txt, indent=4, sort_keys=True)
+    print(json.dumps(txt, indent=4, sort_keys=True))
     
 
 def test():
-    print "Test"
-    print "Make Environment Observation"
+    print("Test")
+    print("Make Environment Observation")
     jsn=makeEnvJson('Air', 'Top', 'Temperature', 23.7, 'Canopy_SI7021', 'Test', status='Complete', comment='self test', validate=True)
     prettyPrint(jsn)
-    print "Make Phenotype Observation"
+    print("Make Phenotype Observation")
     jsn=makePhenoJson(1, 'Leaf', 'Area', 345.6, '13245','Test', status='Complete', comment='self test', validate=True)
     prettyPrint(jsn)
     

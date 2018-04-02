@@ -12,14 +12,14 @@ def logEnvObsvJSON(jsn):
     return getStatus(r)
 
 def getStatus(msg):
-    print msg
+    print(msg)
     return True
 
     
 def test():
     jsn={'foo':'bar'}
     res=logEnvObsvJSON(jsn)
-    print res
+    print(res)
 
 if __name__=="__main__":
     test()    

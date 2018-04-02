@@ -14,55 +14,104 @@ import re
 import json
 from config import config, settings
 
-DEBUG = False
+MODULE = 'Relay'
+
 ON = settings['Relay']['RelayOn']
 OFF = settings['Relay']['RelayOff']
-
-#Relay1 = 33 # Fan
-#Relay2 = 33
-#Relay3 = 33 # LED
-#Relay4 = 33 # Solenoid
-
-#lightPin=33
-#fanPin=33
 
 class Relay(object):
 
     def __init__(self):
+
+        self.DEBUG = False
+        
         if 'Debug' in settings['Relay'] and settings['Relay']['Debug']:
-            print("Debug key exists")
-            DEBUG=True
+            print("%s : Debug key exists" % MODULE)
+            self.DEBUG=True
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         for key in settings['Modules']:
-            if DEBUG:
-                print("\nLooking for relays in module %s" % key)
-            for k, v in settings[key].iteritems():
+            if self.DEBUG:
+                print("%s : Looking for relays in module %s" % (MODULE, key))
+            #for k, v in settings[key].iteritems(): # Only for python2 ### Line to be deleted##
+            for k, v in settings[key].items():
                 if k == 'Relay':
-                    if DEBUG:
-                        print("settings[%s][%s] = %s" % (key, k, v))
-                        print("Setting up GPIO pins for module %s and pins %s" % (key, v))
+                    if self.DEBUG:
+                        print("  settings[%s][%s] = %s" % (key, k, v))
+                        print("  Setting up GPIO pins for module %s and pins %s" % (key, v))
                     # Setting up GPIO pins, may need to pass direction in the future ie. GPIO.IN
                     # Will probably pass it through as a value in config.py ie [{32:GPIO.OUT},{33:GPIO.IN}]
                     GPIO.setup(v, GPIO.OUT)
     
-    def setState(self, pin, state, test=False):
+    def setStateOLD(self, pin, state, test=False):
         '''Change state if different'''
         if test:
-            print "Current ", state, GPIO.input(pin)
+            print("Current ", state, GPIO.input(pin))
         if state==ON and GPIO.input(pin)==OFF: # Some Relays are reversed therefore need to check for off
             self.setOn(pin)
             if test:
-                print "Pin: ", pin, " On"
+                print("Pin: ", pin, " On")
         elif state==OFF and GPIO.input(pin)==ON:
             self.setOff(pin)
             if test:
-                print "Pin: ", pin, " Off"
+                print("Pin: ", pin, " Off")
         else:        
             if test:
-                print "Pin: ", pin, " No change"
+                print("Pin: ", pin, " No change")
+
+    def setState(self, pin, state, test=False):
+        if isinstance(pin, list):
+            changes=[]
+            for i in range(len(pin)):
+                '''Change state if different'''
+                if test:
+                    print("Current ", state[i], GPIO.input(pin[i]))
+                if state[i]==ON and GPIO.input(pin[i])==OFF: # Some Relays are reversed therefore need to check for off
+                    self.setOn(pin[i])
+                    changes.append("On")
+                    if test:
+                        print("Pin: ", pin[i], " On")
+                elif state[i]==OFF and GPIO.input(pin[i])==ON:
+                    self.setOff(pin[i])
+                    changes.append("Off")
+                    if test:
+                        print("Pin: ", pin[i], " Off")
+                else:        
+                    changes.append("No Change")
+                    if test:
+                        print("Pin: ", pin[i], " No change")
+        else:
+            '''Change state if different'''
+            if test:
+                print("Current ", state, GPIO.input(pin))
+            if state==ON and GPIO.input(pin)==OFF: # Some Relays are reversed therefore need to check for off
+                self.setOn(pin)
+                changes = "On"
+                if test:
+                    print("Pin: ", pin, " On")
+            elif state==OFF and GPIO.input(pin)==ON:
+                self.setOff(pin)
+                changes = "Off"
+                if test:
+                    print("Pin: ", pin, " Off")
+            else:        
+                changes = "No Change"
+                if test:
+                    print("Pin: ", pin, " No change")
+        return changes
 
     def getState(self, pin):
+        if isinstance(pin, list):
+            state=[]
+            for i in range(len(pin)):
+                '''Get the current state of the pin'''
+                state.append(GPIO.input(pin[i]))
+        else:
+            '''Get the current state of the pin'''
+            state=GPIO.input(pin)
+        return state
+
+    def getStateOLD(self, pin):
         '''Get the current state of the pin'''
         state=GPIO.input(pin)
         return state
@@ -76,18 +125,18 @@ class Relay(object):
 #            print("Pin ", pin, " On")
 
     def tests(self, tests=[]):
-        DEBUG=True
-        if DEBUG:
-            print("Relay on = %s" % ON)
-            print("Relay off = %s" % OFF)
+        if self.DEBUG:
+            print("%s : Relay on = %s" % (MODULE, ON))
+            print("%s : Relay off = %s" % (MODULE, OFF))
         
         pins = [] # Setup empty array of GPIO pins
         for key in settings['Modules']:
-            if DEBUG:
+            if self.DEBUG:
                 print("\nLooking for relays in module %s" % key)
-            for k, v in settings[key].iteritems():
+            #for k, v in settings[key].iteritems():
+            for k, v in settings[key].items():
                 if k == 'Relay':
-                    if DEBUG:
+                    if self.DEBUG:
                         print("settings[%s][%s] = %s" % (key, k, v))
                     if isinstance(v, list):
                         pins.extend(v)
@@ -149,38 +198,40 @@ class Relay(object):
         print("   Testing state of all relays")
         self.testRelayStates(pins)
         print("   Test Fan and Lights")
-        print("    Turn Fan On - %s" % settings['Fan']['Relay'])
+        print("    Turn Fan On - %s" % settings['Fan1']['On'])
         #self.setOn(settings['Fan']['Relay']) # Need to fix to replace RelayOn and RelayOff
         #time.sleep(10) # Need extra time for exhaust fan to spin up
         print("    Turn Light On - %s with settings %s" % (settings['Light']['Relay'], settings['Light']['On']))
         #self.setOn(settings['Light']['Relay']) # Need to fix to replace RelayOn and RelayOff
         #time.sleep(5)
-        print("    Turn Fan Off - %s" % settings['Fan']['Relay'])
+        print("    Turn Fan Off - %s" % settings['Fan1']['Off'])
         #self.setOff(settings['Fan']['Relay']) # Need to fix to replace RelayOn and RelayOff
         #time.sleep(5)        
         print("    Turn Light Off - %s with settings %s" % (settings['Light']['Relay'], settings['Light']['On']))
         #self.setOff(settings['Light']['Relay']) # Need to fix to replace RelayOn and RelayOff
         #time.sleep(5)
 
-        if isinstance(settings['Fan']['Relay'], list):
-            fanPin = settings['Fan']['Relay'][0] # Pick first Fan
+        # This needs to be fixed later, somehow check is not right
+        # Probably should just loop at top and find first fan and set variable
+        if isinstance(settings['Fan1']['Relay'], list):
+            fanPin = settings['Fan1']['Relay'] # Pick first Fan
         else:
-            fanPin = settings['Fan']['Relay']
+            fanPin = settings['Fan1']['Relay']
 
-        print "Conditional Turn Fan On"
+        print("Conditional Turn Fan On")
         self.setState(fanPin, ON, True)
         time.sleep(5)        
-        print "Conditional Turn Fan On"
+        print("Conditional Turn Fan On")
         self.setState(fanPin, ON, True)
         time.sleep(5)
-        print "Conditional Turn Fan Off"
+        print("Conditional Turn Fan Off")
         self.setState(fanPin, OFF, True)
         time.sleep(5)        
-        print "Conditional Turn Fan Off"
+        print("Conditional Turn Fan Off")
         self.setState(fanPin, OFF, True)
 
 
 if __name__=="__main__":
     r=Relay()
-    #r.tests([1,2,3,4]) # Test 4 should fail
-    r.tests([3])
+    r.tests([1,2,3,4]) # Test 4 should fail
+    #r.tests([3])

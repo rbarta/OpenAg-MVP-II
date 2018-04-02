@@ -11,9 +11,9 @@ import pprint
 import time
 from utils import print_indent
 
-MODULE = 'Fan'
+MODULE = 'Light'
 
-class Fan(object):
+class Light(object):
 
     def __init__(self, name='None'):
 
@@ -57,72 +57,61 @@ class Fan(object):
 
         # Set variables to values from config.py
         #
-        self.fanRelay=settings[name]['Relay']
-        self.fanMode=settings[name]['Mode']
+        self.lightRelay=settings[name]['Relay']
+        self.lightMode=settings[name]['Mode']
         self.state = {}
-        
+
         # Note: If Relay is a list so must 'On' and 'Off' there is no check it will just error and skip
         #
         if isinstance(settings[name]['Relay'],list):
             self.state['On'] = []
             self.state['Off'] = []
             for i in range(len(settings[name]['On'])):
-                self.state['On'].append(settings['Relay'][settings[name]['On'][i]])
+               self.state['On'].append(settings['Relay'][settings[name]['On'][i]])
             for i in range(len(settings[name]['Off'])):
-                self.state['Off'].append(settings['Relay'][settings[name]['Off'][i]])
+               self.state['Off'].append(settings['Relay'][settings[name]['Off'][i]])
         else:
             self.state['On'] = settings['Relay'][settings[name]['On']]   # Lookup value of Relay as some
             self.state['Off'] = settings['Relay'][settings[name]['Off']] # relays are reversed ie On is 0
 
-        # Set RPM and Speed pin if they are in the config file otherwise set to 0 (does not exist)
-        #
-        if 'SpeedPin' in settings[name]:
-            self.speedPin = settings[name]['SpeedPin']
-        else:
-            self.speedPin = 0
-        if 'RpmPin' in settings[name]:
-            self.rpmPin = settings[name]['RpmPin']
-        else:
-            self.rpmPin = 0
-        
-
     # Function to turn on an off fan
     #
-    def setFan(self, state, test=False):
+    def setLight(self, state, test=False):
 
         # Add indent
         self.indent+=2
         # Get the current state of the relay
         #
-        currentState = self.relay.getState(self.fanRelay)
+        currentState = self.relay.getState(self.lightRelay)
         if test:
-            print_indent(("Current state of the Fan is %s" % currentState),self.indent)
+            print_indent(("Current state of the Light is %s" % currentState),self.indent)
 
-        # Change the state of the Fan Relay and change if required
+        # Change the state of the Light Relay and change if required
         #
         if currentState == self.state[state]:
             if test:
-                print_indent(("setFan to %s - No change state is already correct" % state),self.indent)
+                print_indent(("setLight to %s - No change state is already correct" % state),self.indent)
         else:
             if test:
-                print_indent(("setFan to %s - Change state of Fan from %s to %s" % (state, currentState, self.state[state])),self.indent)
+                print_indent(("setLight to %s - Change state of Light from %s to %s" % (state, currentState, self.state[state])),self.indent)
 
             #
             # If in Check mode do not change state of relay only report
-            if not self.fanMode == 'Check':
-                self.relay.setState(self.fanRelay, self.state[state])
+            if not self.lightMode == 'Check':
+                print("Here %s %s" % (self.lightRelay, self.state[state]))
+                self.relay.setState(self.lightRelay, self.state[state])
             else:
                 print_indent(("In \"Check Mode\" therefore no changes will be made"),self.indent+2)
 
         # Get the current state of the relay and check if change worked
         #
-        currentState = self.relay.getState(self.fanRelay)
+        currentState = self.relay.getState(self.lightRelay)
         if not currentState == self.state[state]:
             if test:
-                print_indent(("setFan to %s - Could not change state" % state),self.indent)
+                print_indent(("setLight to %s - Could not change state" % state),self.indent)
         #
         # If in Check mode do not change state of relay only report
-        if not self.fanMode == 'Check':
+        if not self.lightMode == 'Check':
             self.logState(state, test)
         else:
             print_indent(("In \"Check Mode\" therefore no logging to database"),self.indent+2)
@@ -133,7 +122,7 @@ class Fan(object):
         status_qualifier='Success'
         if test:
             status_qualifier='Test'
-        jsn=makeEnvJson('State_Change', 'Fan', 'Side', 'State', value, 'Fan', status_qualifier)
+        jsn=makeEnvJson('State_Change', 'Light', 'Side', 'State', value, 'Light', status_qualifier)
         pp = pprint.PrettyPrinter(indent=4)
         print_indent(("LogState is:"),self.indent)
         print_indent(pp.pformat(jsn),self.indent+2)
@@ -144,69 +133,72 @@ class Fan(object):
         print_indent(("Running Tests"),self.indent)
 
         print_indent(("Check for non-existant module"),self.indent)
-        Fan('Fan9999')
+        Light('Light9999')
         time.sleep(2)
         
         print_indent(("Check for wrong Type"),self.indent)
-        Fan('Light')
+        Light('Fan')
         time.sleep(2)
         print_indent("Done\n",self.indent)
 
     def test2(self):
 
-        print_indent(("Show settings for Fan"),self.indent)
+        print_indent(("Show settings for Light"),self.indent)
         self.indent+=2
-        print_indent(("Fan Mode: %s" % self.fanMode),self.indent)
-        print_indent(("Fan Relay: %s" % self.fanRelay),self.indent)
-        print_indent(("Fan Speed Pin: %s" % self.speedPin),self.indent)
-        print_indent(("Fan RPM Pin: %s" % self.rpmPin),self.indent)
-        print_indent(("Fan Relay On: %s" % self.state['On']),self.indent)
-        print_indent(("Fan Relay Off: %s" % self.state['Off']),self.indent)
+        print_indent(("Light Mode: %s" % self.lightMode),self.indent)
+        print_indent(("Light Relay: %s" % self.lightRelay),self.indent)
+        print_indent(("Light Relay On: %s" % self.state['On']),self.indent)
+        print_indent(("Light Relay Off: %s" % self.state['Off']),self.indent)
         self.indent-=2
- 
-        if self.relay.getState(self.fanRelay) == self.state['On']:
+
+
+        # Assume that if light is not On then it must be Off
+        if self.relay.getState(self.lightRelay) == self.state['On']:
             currentState = "On"
         else:
             currentState = "Off"
-        print_indent(("Current state of Fan is %s (%s)" % (self.relay.getState(self.fanRelay),currentState)),self.indent)
+        print_indent(("Current state of Light is %s (%s)" % (self.lightRelay,self.relay.getState(self.lightRelay))),self.indent)
 
-        print_indent(("Turn Fan On"),self.indent)
-        self.setFan("On",True)        
+        print_indent(("Turn Light On"),self.indent)
+        self.setLight("On",True)        
         time.sleep(5)
 
-        print_indent(("Turn Fan Off"),self.indent)
-        self.setFan("Off",True)    
+        print_indent(("Turn Light Off"),self.indent)
+        self.setLight("Off",True)    
         time.sleep(5)
 
-        print_indent(("Turn Fan Off"),self.indent)
-        self.setFan("Off",True)    
+        print_indent(("Turn Light Off"),self.indent)
+        self.setLight("Off",True)    
         time.sleep(5)
 
-        print_indent(("Turn Fan On"),self.indent)
-        self.setFan("On",True)        
+        print_indent(("Turn Light On"),self.indent)
+        self.setLight("On",True)        
         time.sleep(5)
 
-        print_indent(("Resetting Fan to original state (%s)" % currentState),self.indent)
-        self.setFan(currentState, True)        
+        print_indent(("Resetting Light to original state (%s)" % currentState),self.indent)
+        self.setLight(currentState, True)        
 
         print("Done\n")
 
 
 if __name__=="__main__":
-    # Change so that it looks up the first available of type Fan
+    # Change so that it looks up the first available of type Light
     
     print_indent("Running tests for wrong and non-existant modules")
-    f = Fan()
+    f = Light()
     f.test()            
-    # Loop through to test all of type Fan
+    # Loop through to test all of type Light
     # Also find first one type type light and use that for the negetive test (feed it to test)
     #
     for name in settings:
-        try:
+        print("Name is %s" % (name))
+        if isinstance(settings[name],dict) and settings[name].get('Type'):
             if settings[name]['Type'] == MODULE:
                 print_indent("%s is of type %s. Running Tests." % (name, MODULE))
-                f = Fan(name)
+                f = Light(name)
                 f.test2() 
-        except:
-            print_indent("%s is not of type %s, skipping tests.\n" % (name, MODULE))
+            else:
+                print_indent("%s is not of type %s, skipping tests.\n" % (name, MODULE))
+        else:
+            print_indent("%s is not of type %s and either, is not a dictionary or doesn't contain 'Type' key, skipping tests.\n" % (name, MODULE))
 

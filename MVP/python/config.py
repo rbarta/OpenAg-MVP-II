@@ -27,36 +27,58 @@ config = {
 #      RpmPin - GPIO pin that it sends the fan RPM to, 0 means no control
 #
 settings = {   
-        'Modules': ['Alert', 'Relay', 'Fan', 'Light'],
+        'Modules': ['Alert', 'Relay', 'AirPump', 'Fan1', 'Fan2', 'Light'],
         'Relay': {
-            'Debug': True,
             'RelayOff': GPIO.HIGH,
-            'RelayOn': GPIO.LOW
+            'RelayOn': GPIO.LOW,
+            'Type': 'Relay'
         },
         'Alert' : {
             'Mode': 'Check',
             'Transport': 'telegram',
-            'Token': 'put_token_here'
+            'Token': 'put_token_here',
+            'Type': 'Alert'
         },
-        'Fan' : {
+        'AirPump' : {
             'Mode': 'Check',
-            'Location': [ 'Top', 'Side'],
-            'Off': ['RelayOff', 'RelayOff'],
-            'On': ['RelayOn', 'RelayOn'],
-            'Purpose': ['Circulation', 'Exhaust'],
-            'Relay': [33, 32],
+            'Location': 'Side',
+            'Watts': 10,
+        },
+        'Fan1' : {
+            'Debug': True,
+            'Mode': 'Run',
+            'Location': 'Top',
+            'Off': 'RelayOff',
+            'On': 'RelayOn',
+            'Purpose': 'Circulation',
+            'Relay': 16,
             'Type': 'Fan',
-            'SpeedPin': [0, 0],
-            'RpmPin': [0, 0]
+            'Watts': 10,
+            'SpeedPin': 0,
+            'RpmPin': 0
+        },
+        'Fan2' : {
+            'Mode': 'Check',
+            'Location': 'Side',
+            'Off': 'RelayOff',
+            'On': 'RelayOn',
+            'Purpose': 'Exhaust',
+            'Relay': 18,
+            'Type': 'Fan',
+            'Watts': 10,
+            'SpeedPin': 0,
+            'RpmPin': 0
         },
         'Light' : {
-            'Mode': 'Check',
+            'Debug': False,
+            'Mode': 'Run',
             'Location': 'Top',
             'Off': ['RelayOff', 'RelayOff', 'RelayOff', 'RelayOff'],
-            'On': ['RelayOff', 'RelayOn', 'RelayOff', 'RelayOn'],
+            'On': ['RelayOn', 'RelayOff', 'RelayOn', 'RelayOff'],
             'Purpose': 'Light',
-            'Relay': [35, 36, 37, 38],
+            'Relay': [36, 37, 38, 40],
             'Type': 'Light',
+            'Watts': 10,
         },
     } 
 if __name__ == "__main__":
