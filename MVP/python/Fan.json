@@ -1,0 +1,29 @@
+{
+	"mandatory": {
+		"warn": "False", 
+		"error": "True",
+		"check": {
+			"Mode": {"type": "str"}, 
+			"Location": {"type": "str"}, 
+			"Off": {"type": "str"}, 
+			"On": {"type": "str"}, 
+			"Relay": {"type": "int"}, 
+			"Purpose": {"type": "str"},
+			"Type": {"type": "str"}
+		} 
+	}, 
+	"optional": {
+		"warn": "False", 
+		"error": "False",
+		"check": {
+			"Debug": {"type": "bool"},
+			"Watts": {"type": "int"},
+			"SpeedPin": {"type": "int"},
+			"RpmPin": {"type": "int"}
+		} 
+	}, 
+	"rest": {
+		"warn": "True", 
+		"error": "False"
+	}
+}

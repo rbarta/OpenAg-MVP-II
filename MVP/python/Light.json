@@ -1,0 +1,27 @@
+{
+	"mandatory": {
+		"warn": "False", 
+		"error": "True",
+		"check": {
+			"Mode": {"type": "str"}, 
+			"Location": {"type": "str"}, 
+			"Off": {"list": {"type": "str"}}, 
+			"On": {"list": {"type": "str"}}, 
+			"Relay": {"list": {"type": "int"}}, 
+			"Purpose": {"type": "str"},
+			"Type": {"type": "str"}
+		} 
+	}, 
+	"optional": {
+		"warn": "False", 
+		"error": "False",
+		"check": {
+			"Debug": {"type": "bool"},
+			"Watts": {"type": "int"}
+		} 
+	}, 
+	"rest": {
+		"warn": "True", 
+		"error": "False"
+	}
+}

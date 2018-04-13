@@ -1,0 +1,22 @@
+{
+	"mandatory": {
+		"warn": "False", 
+		"error": "True",
+		"check": {
+			"RelayOff": {"type": "int"}, 
+			"RelayOn": {"type": "int"}, 
+			"Type": {"type": "str"}
+		} 
+	}, 
+	"optional": {
+		"warn": "False", 
+		"error": "False",
+		"check": {
+			"Debug": {"type": "bool"}
+		} 
+	}, 
+	"rest": {
+		"warn": "True", 
+		"error": "False"
+	}
+}

@@ -1,12 +1,20 @@
-# Acuator for the exhaust fan
+# Light Control
+# Controls the turning on and turning off of lights
+# Lights are wired into Relay #4 (Pin 29)
 # Author: Howard Webb
 # Date: 2/15/2017
+#
+# Version 1.1
+# Date: 4/2/2017
+# Author: Ray Barta
+# Changed code to accept both python2 and python3
+# Modified to use config.py for settings (GPIO)
 
 #from env import env
 from JsonUtil import makeEnvJson
 from Relay import *
 import CouchDB
-from config import settings
+from config import Config
 import pprint
 import time
 from utils import print_indent
@@ -26,13 +34,20 @@ class Light(object):
         
         # Check if Module is in config file (config.py)
         #
-        try:
-            if not settings[name]['Type'] == MODULE:
-                print_indent(("%s : Config %s is not of type %s" % (MODULE, name, MODULE)),self.indent)
-                return
+        isInConfig=False
+        isModule=False
+        for key in Config().settings['Modules']:
+            if 'Type' in Config().settings['Modules'][key]:
+                isInConfig=True
+            if Config().settings['Modules'][key].get('Type') == MODULE:
+                if key == name:
+                    isModule=True
+                settings = Config().settings['Modules']
 
-                
-        except:
+        if not isModule:
+            print_indent(("%s : Config %s is not of type %s" % (MODULE, name, MODULE)),self.indent)
+            return
+        if not isInConfig:
             print_indent(("%s : Module %s does not exist in config" % (MODULE, name)),self.indent)
             return
         
@@ -47,6 +62,12 @@ class Light(object):
             self.indent-=2
 
             self.DEBUG=True
+
+        (warn, err) = self.check_config(name)
+        if True in (warn, err):
+            print_indent(("%s : Check config failed with Warning being %s, Error being %s" % (MODULE, warn, err)),self.indent)
+            print_indent(("%s : Check types of %s in settings" % (MODULE, MODULE)),self.indent)
+            exit()
         
         self.relay=Relay()
 
@@ -73,6 +94,31 @@ class Light(object):
         else:
             self.state['On'] = settings['Relay'][settings[name]['On']]   # Lookup value of Relay as some
             self.state['Off'] = settings['Relay'][settings[name]['Off']] # relays are reversed ie On is 0
+
+    def check_config(self, name='None'):
+        #
+        # Checks contains items to check for and whether they are mandatory or optional
+        # It then compares it against what is found of Type MODULE in the config.json file
+        #
+        # checks.json will have the following fields:
+        #   error: Error if missing
+        #   warn: Warning if missing
+        # Note that the rest item is what to do if it finds something that is neither mandatory or optional
+        with open(MODULE + ".json","r") as check_file:
+            checks = json.load(check_file)
+
+        if name == 'None':
+            for key in Config().settings['Modules']:
+                if 'Type' in Config().settings['Modules'][key]:
+                    if Config().settings['Modules'][key].get('Type') == MODULE:
+                        results = check_configuration(checks, Config().settings['Modules'][key],self.indent,self.DEBUG)
+                else:
+                    print_indent(("*** ERROR **** Type does not exist in %s" % key),self.indent)
+                    return(False, True) # Warning and Error
+        else:
+            results = check_configuration(checks, Config().settings['Modules'][name],self.indent,self.DEBUG)
+
+        return(results)
 
     # Function to turn on an off fan
     #
@@ -182,13 +228,14 @@ class Light(object):
 
 
 if __name__=="__main__":
+    settings = Config().settings['Modules']
     # Change so that it looks up the first available of type Light
     
     print_indent("Running tests for wrong and non-existant modules")
     f = Light()
     f.test()            
     # Loop through to test all of type Light
-    # Also find first one type type light and use that for the negetive test (feed it to test)
+    # Also find first one type type fan and use that for the negetive test (feed it to test)
     #
     for name in settings:
         print("Name is %s" % (name))

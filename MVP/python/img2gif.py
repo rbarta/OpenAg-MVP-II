@@ -16,6 +16,8 @@ except NeedDownloadError:
 from datetime import datetime
 from env import env
 from config import config
+import glob
+import os
 
 out_file="plant.gif"
 
@@ -31,17 +33,19 @@ def resizeClips(clips, wide):
 def getPics(dir, type, start_date, end_date):    
     prior_day=0
     pics=[]
-    for file in sorted(dir):
+    filelist = glob.glob(dir+"*"+type)
+    for file in sorted(filelist):
         if file.endswith(type):
+            file = os.path.basename(file)
             dt=file.split('_')
-#        print file, dt
+            print file, dt
             if dt[0] > start_date and dt[0] < end_date:
                 # get one image per day
                 day=dt[0].split('-')
                 now=day[2]
-#            print now, prior_day
+                print now, prior_day
                 if now!=prior_day:
-#                    print file
+                    print file
                     prior_day = now
                     pics.append(dir+file)
     return pics
@@ -53,7 +57,7 @@ def main():
     start_date=env['trials'][1]['start_date']
     end_date=str(datetime.now())
     # Source of images
-    dir="/home/pi/MPV/pictures/"
+    dir="/home/pi/MVP/pictures/"
     # Image type to select
     type=".jpg"
     # Resize the image to 640x480 (resizing will keep ratio with one dimension specified)
@@ -61,7 +65,7 @@ def main():
     # Output file name (will be in the python directory with this code)
     png_name="plant.gif"
     # Frames per second speed
-    speed=2
+    speed=1
 
     print "Get Pics from ", start_date, " to ", end_date
     pics=getPics(dir, type, start_date, end_date)
