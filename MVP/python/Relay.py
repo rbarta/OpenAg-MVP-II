@@ -24,10 +24,11 @@ MODULE = 'Relay'
 
 class Relay(object):
 
-    def __init__(self):
+    def __init__(self, name='None'):
 
         self.DEBUG = False
         self.indent = 2
+        print_indent(("%s : Checking config for module %s" % (MODULE, name)),self.indent)
         (warn, err) = self.check_config()
         if True in (warn, err):
             print_indent(("%s : Check config failed with Warning being %s, Error being %s" % (MODULE, warn, err)),self.indent)
@@ -41,7 +42,7 @@ class Relay(object):
                     self.ON = settings['Relay']['RelayOn']
                     self.OFF = settings['Relay']['RelayOff']
         
-        if 'Debug' in settings['Relay'] and settings['Relay']['Debug']:
+        if 'Debug' in settings[MODULE] and settings[MODULE]['Debug']:
             print_indent(("%s : Debug key exists" % MODULE),self.indent)
             self.DEBUG=True
         GPIO.setwarnings(False)
@@ -69,6 +70,7 @@ class Relay(object):
         #   error: Error if missing
         #   warn: Warning if missing
         # Note that the rest item is what to do if it finds something that is neither mandatory or optional
+        self.indent+=2
         with open(MODULE + ".json","r") as check_file:
             checks = json.load(check_file)
 
@@ -78,8 +80,10 @@ class Relay(object):
                     results = check_configuration(checks, Config().settings['Modules'][key],self.indent,self.DEBUG)
             else:
                 print_indent(("*** ERROR **** Type does not exist in %s" % key),self.indent)
+                self.indent-=2
                 return(False, True) # Warning and Error
 
+        self.indent-=2
         return(results)
 
     def setState(self, pin, state, test=False):
@@ -90,12 +94,14 @@ class Relay(object):
                 if test:
                     print_indent(("Current ", state[i], GPIO.input(pin[i])),self.indent)
                 if state[i]==self.ON and GPIO.input(pin[i])==self.OFF: # Some Relays are reversed therefore need to check for off
-                    self.setOn(pin[i])
+                    #self.setOn(pin[i])
+                    GPIO.output(pin[i], self.ON)
                     changes.append("On")
                     if test:
                         print_indent(("Pin: ", pin[i], " On"),self.indent)
                 elif state[i]==self.OFF and GPIO.input(pin[i])==self.ON:
-                    self.setOff(pin[i])
+                    #self.setOff(pin[i])
+                    GPIO.output(pin[i], self.ON)
                     changes.append("Off")
                     if test:
                         print_indent(("Pin: ", pin[i], " Off"),self.indent)
@@ -108,12 +114,14 @@ class Relay(object):
             if test:
                 print_indent(("Current %s %s" % (state, GPIO.input(pin))),self.indent)
             if state==self.ON and GPIO.input(pin)==self.OFF: # Some Relays are reversed therefore need to check for off
-                self.setOn(pin)
+                #self.setOn(pin)
+                GPIO.output(pin, self.ON)
                 changes = "On"
                 if test:
                     print_indent(("Pin: %s On" % pin),self.indent)
             elif state==self.OFF and GPIO.input(pin)==self.ON:
-                self.setOff(pin)
+                #self.setOff(pin)
+                GPIO.output(pin, self.OFF)
                 changes = "Off"
                 if test:
                     print_indent(("Pin: %s Off" % pin),self.indent)
@@ -180,7 +188,8 @@ class Relay(object):
                 print_indent(("States of Pins %s are %s" % (pins, states)),self.indent+2)
                 print_indent(("Will turn off all relays in 2 seconds"),self.indent)
                 time.sleep(2)
-                self.setOff(pins)
+                #self.setOff(pins)
+                GPIO.output(pin, self.OFF)
                 for pin in pins:
                     print_indent(("Testing pin %s" % pin),self.indent+2)
                     self.testRelayOnOff(pin)
@@ -211,10 +220,12 @@ class Relay(object):
 
     def testRelayOnOff(self,pin):
         print_indent(("      Pin %s set to On" % pin),self.indent)
-        self.setOn(pin, self.ON)
+        #self.setOn(pin, self.ON)
+        self.setState(pin, self.ON, True)
         time.sleep(10)
         print_indent(("      Pin %s set to Off" % pin),self.indent)
-        self.setOff(pin, self.OFF)
+        #self.setOff(pin, self.OFF)
+        self.setState(pin, self.OFF, True)
     
     def testfunctions(self,pins):
         settings = Config().settings['Modules']

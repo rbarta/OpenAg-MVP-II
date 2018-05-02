@@ -5,8 +5,7 @@
 		"check": {
 			"Mode": {"type": "str"}, 
 			"Location": {"type": "str"}, 
-			"Off": {"list": {"type": "str"}}, 
-			"On": {"list": {"type": "str"}}, 
+			"State": {"dict": {"list": {"type": "str"}}}, 
 			"Relay": {"list": {"type": "int"}}, 
 			"Purpose": {"type": "str"},
 			"Type": {"type": "str"}

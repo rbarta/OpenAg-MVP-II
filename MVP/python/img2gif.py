@@ -15,7 +15,7 @@ except NeedDownloadError:
 #import cv2
 from datetime import datetime
 from env import env
-from config import config
+from config import Config
 import glob
 import os
 

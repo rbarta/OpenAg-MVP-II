@@ -82,7 +82,6 @@ class si7021(object):
         print('\n*** Test SI7021 ***\n')
         temp = self.getTempC()
         rhumid = self.getHumidity()
-        temp=self.getTempC()
         if temp == None:
             print("Error getting temperature: %s" %self.getError())
         else:

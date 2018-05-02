@@ -1,0 +1,56 @@
+{ 
+	"Condition": {
+  		"mandatory": {
+			"warn": "False", 
+			"error": "True",
+			"check": {
+				"Channel": {"type": "str"}, 
+				"Condition": {"type": "str"}, 
+				"Value": {"type": "str"}, 
+				"Alert": {"type": "bool"},
+				"AlertOnFailure": {"type": "bool"}
+			} 
+		}, 
+		"optional": {
+			"warn": "False", 
+			"error": "False",
+			"check": {
+				"Module": {"type": "str"}, 
+				"State": {"type": "str"},
+				"Retry": {"type": "int"}, 
+				"Debug": {"type": "bool"}
+			} 
+		}, 
+		"rest": {
+			"warn": "True", 
+			"error": "False"
+		}
+	},
+	"Cron": {
+  		"mandatory": {
+			"warn": "False", 
+			"error": "True",
+			"check": {
+				"Cron": {"type": "str"}, 
+				"Value": {"type": "str"}, 
+				"Alert": {"type": "bool"},
+				"AlertOnFailure": {"type": "bool"}
+			} 
+		}, 
+		"optional": {
+			"warn": "False", 
+			"error": "False",
+			"check": {
+				"Command": {"type": "str"}, 
+				"Module": {"type": "str"}, 
+				"State": {"type": "str"},
+				"Retry": {"type": "int"}, 
+				"Debug": {"type": "bool"}
+			} 
+		}, 
+		"rest": {
+			"warn": "True", 
+			"error": "False"
+		}
+	}
+}
